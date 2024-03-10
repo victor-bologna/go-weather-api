@@ -8,41 +8,41 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type mockLogFile struct {
+type MockLogFile struct {
 	mock.Mock
 }
 
-type mockLogFileError struct {
+type MockLogFileError struct {
 	mock.Mock
 }
 
-func newMockLogFile() *mockLogFile { return &mockLogFile{} }
+func NewMockLogFile() *MockLogFile { return &MockLogFile{} }
 
-func (m *mockLogFile) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+func (m *MockLogFile) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
 	args := m.Called(name, flag, perm)
 	return args.Get(0).(*os.File), args.Error(1)
 }
 
-func (m *mockLogFile) New(out io.Writer, prefix string, flag int) *log.Logger {
+func (m *MockLogFile) New(out io.Writer, prefix string, flag int) *log.Logger {
 	args := m.Called(out, prefix, flag)
 	return args.Get(0).(*log.Logger)
 }
 
-func (m *mockLogFile) Println(log *log.Logger, v ...any) {
+func (m *MockLogFile) Println(log *log.Logger, v ...any) {
 	m.Called(v)
 }
 
-func newMockLogFileError() *mockLogFileError { return &mockLogFileError{} }
+func NewMockLogFileError() *MockLogFileError { return &MockLogFileError{} }
 
-func (m *mockLogFileError) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+func (m *MockLogFileError) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
 	args := m.Called(name, flag, perm)
 	return nil, args.Error(1)
 }
 
-func (m *mockLogFileError) New(out io.Writer, prefix string, flag int) *log.Logger {
+func (m *MockLogFileError) New(out io.Writer, prefix string, flag int) *log.Logger {
 	panic("Unimplemented")
 }
 
-func (m *mockLogFileError) Println(log *log.Logger, v ...any) {
+func (m *MockLogFileError) Println(log *log.Logger, v ...any) {
 	panic("Unimplemented")
 }

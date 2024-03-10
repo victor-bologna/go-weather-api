@@ -17,7 +17,7 @@ func TestRegisterLogFile_Success(t *testing.T) {
 	var mockFile = &os.File{}
 	var mockLogger = &log.Logger{}
 
-	mockLogFile := newMockLogFile()
+	mockLogFile := NewMockLogFile()
 	mockLogFile.On("OpenFile", "weather.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0644)).Return(mockFile, nil)
 	mockLogFile.On("New", mockFile, status, log.Ldate|log.Ltime|log.Lmicroseconds).Return(mockLogger)
 	mockLogFile.On("Println", mock.Anything)
@@ -37,7 +37,7 @@ func TestRegisterLogFile_Error(t *testing.T) {
 
 	err2 := errors.New("open weather.log: The system cannot find the file specified.")
 
-	mockLogFile := newMockLogFileError()
+	mockLogFile := NewMockLogFileError()
 	mockLogFile.On("OpenFile", "weather.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0644)).Return(nil, err2)
 
 	err := RegisterLogFile(weatherMock, status, mockLogFile)
