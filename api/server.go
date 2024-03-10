@@ -22,20 +22,22 @@ type errorResponse struct {
 }
 
 type WeatherServer struct {
+	mux     *http.ServeMux
 	port    string
 	storage storage.WeatherDB
 }
 
-func NewWeatherAPI(port string, storage storage.WeatherDB) *WeatherServer {
+func NewWeatherAPI(port string, storage storage.WeatherDB, mux *http.ServeMux) *WeatherServer {
 	return &WeatherServer{
+		mux:     mux,
 		port:    port,
 		storage: storage,
 	}
 }
 
 func (server *WeatherServer) StartServer() {
-	http.HandleFunc("/weather", http.HandlerFunc(server.GetWeather))
-	http.ListenAndServe(":8080", nil)
+	server.InitializeHandlers()
+	http.ListenAndServe(server.port, server.mux)
 }
 
 func (server *WeatherServer) GetWeather(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +96,7 @@ func (server *WeatherServer) validateParams(r *http.Request) error {
 }
 
 func (server *WeatherServer) makeHttpRequestWithContext(r *http.Request) (*http.Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*510)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://api.open-meteo.com/v1/forecast", nil)
 	if err != nil {
@@ -122,4 +124,8 @@ func (server *WeatherServer) handleError(w http.ResponseWriter, httpStatus int, 
 	}
 	json.NewEncoder(w).Encode(errorResponse)
 	file.RegisterLogFile(errorResponse, "ERROR: ", types.NewStandardLogFile())
+}
+
+func (server *WeatherServer) InitializeHandlers() {
+	server.mux.HandleFunc("/weather", http.HandlerFunc(server.GetWeather))
 }
